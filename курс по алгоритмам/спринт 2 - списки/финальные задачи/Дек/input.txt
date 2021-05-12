@@ -1,0 +1,16 @@
+14
+2
+push_front 861
+push_front 861
+push_front 861
+push_front 861
+push_front 861
+push_front 861
+pop_back
+push_front 862
+push_front 862
+push_front 862
+push_front 862
+push_front 862
+push_front 862
+pop_front

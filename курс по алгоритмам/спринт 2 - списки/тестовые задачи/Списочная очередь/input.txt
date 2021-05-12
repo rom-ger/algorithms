@@ -1,0 +1,10 @@
+9
+put 2
+put 4
+put 5
+put 6
+get
+get
+get
+get
+get
