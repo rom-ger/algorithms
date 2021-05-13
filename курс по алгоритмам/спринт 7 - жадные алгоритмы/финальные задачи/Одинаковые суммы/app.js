@@ -1,4 +1,4 @@
-// ID - 51407535
+// ID - 51418817
 
 /**
  * Принцип работы алогритма:
@@ -25,7 +25,7 @@
  * Все элементы множества - O(N)
  * Матрицу, размера K/2 на N - O(K/2 * N)
  * 
- * в сумме получаем: O(N) + O(K/2 * N) = O(K/2 * N)
+ * в сумме получаем: O(N) + O(K/2 * N) = O(K * N)
  */
 
 const fs = require('fs');
@@ -52,13 +52,18 @@ fileContent.split('\n').forEach((line, index) => {
 });
 
 function calc() {
-    // если сумма нечётная, то сразу можно вернуть false
-    if (sum % 2 !== 0) {
+    let countPart = 2;
+    // если сумма нечётная или в массиве недостаточно элементов для разбиения, то сразу можно вернуть false
+    if (sum % countPart !== 0 || count < countPart) {
         return 'False';
     }
-    let countLine = sum / 2;
+    let countLine = sum / countPart;
+    // если есть хоть одно число большее половины суммы
+    if (data.some(point => point > countLine)) {
+        return 'False';
+    }
     // заполняем нашу матрицу стартовыми значениями
-    let dp = new Array(countLine + 1).fill([]);
+    let dp = new Array(countLine + 1).fill(null);
     dp.forEach((line, index) => {
         if (!index) {
             dp[index] = new Array(count + 1).fill(true);

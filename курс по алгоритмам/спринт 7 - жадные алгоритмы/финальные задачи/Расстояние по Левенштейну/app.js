@@ -1,4 +1,4 @@
-// ID - 51408171
+// ID - 51418837
 
 /**
  * Принцип работы алогритма:
@@ -43,7 +43,7 @@ fileContent.split('\n').forEach((line, index) => {
 
 function calc() {
     // создаём матрицу для хранения динамических результатов
-    let dp = new Array(str1.length + 1).fill([]);
+    let dp = new Array(str1.length + 1).fill(null);
     dp.forEach((line, index) => {
         dp[index] = new Array(str2.length + 1);
     });
