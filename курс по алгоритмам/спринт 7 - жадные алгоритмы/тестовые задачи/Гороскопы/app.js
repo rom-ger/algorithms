@@ -60,18 +60,16 @@ while(dp[i][j] !== 0) {
         i = i - 1;
         j = j - 1;
     } else {
-        if (dp[i][j] === dp[i][j - 1] && dp[i][j - 1] === dp[i - 1][j]) {
-            i = i - 1;
+        if (dp[i][j] === dp[i][j - 1]) {
             j = j - 1;
         } else if(dp[i][j] === dp[i - 1][j]) {
             i = i - 1;
         } else {
+            i = i - 1;
             j = j - 1;
         }
     }
 }
-
-console.log(dp)
 
 result = `${result}\n${answerIndexA.join(' ')}\n${answerIndexB.join(' ')}`;
 
