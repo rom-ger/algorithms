@@ -4,7 +4,6 @@ let fileContent = fs.readFileSync('input.txt', 'utf8');
 let text = '';
 let countWords = 0;
 let dex = 10;
-let patterns = [];
 
 class TrieItem {
     constructor(value, isTerm = false) {
@@ -36,7 +35,6 @@ function addWordToTrie(word) {
     return currentNode;
 }
 
-
 fileContent.split('\n').forEach((line, index) => {
     if (index === 0) {
         text = line;
@@ -46,25 +44,27 @@ fileContent.split('\n').forEach((line, index) => {
     }
     if (index > 1 && index <= countWords + 1) {
         addWordToTrie(line);
-        patterns.push(line);
     }
 });
 
-function check(currentNode, index, isRoot = false) {
-    if (index >= text.length) {
-        return currentNode.isTerm || isRoot;
-    }
-    let symbol = text[index];
-    let nextNode = currentNode.child.get(symbol);
-    if (!nextNode) {
-        return false;
-    }
-    if (!nextNode.isTerm) {
-        return check(nextNode, index + 1);
-    }
-    return check(trie.root, index + 1, true) || check(nextNode, index + 1);
-}
+let stack = [{node: trie.root, index: 0, isRoot: true}];
 
-let isValid = check(trie.root, 0, true);
+let isValid = false;
+
+while(stack.length && !isValid) {
+    const {node, index, isRoot} = stack.pop();
+    if (index >= text.length) {
+        isValid = node.isTerm || isRoot;
+        continue;
+    }
+    let nextNode = node.child.get(text[index]);
+    if (!nextNode) {
+        continue;
+    }
+    stack.push({node: nextNode, index: index + 1, isRoot: false});
+    if (nextNode.isTerm) {
+        stack.push({node: trie.root, index: index + 1, isRoot: true});
+    }
+}
 
 fs.writeFileSync('output.txt', isValid ? 'YES' : 'NO');
