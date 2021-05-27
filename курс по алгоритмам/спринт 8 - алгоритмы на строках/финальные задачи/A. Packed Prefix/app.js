@@ -1,78 +1,95 @@
+// ID - 51677014
+
+/**
+ * Принцип работы алогритма:
+ * 1. Распаковываем каждую строку с помощью простого стэка
+ * 2. Проверяем на равенство каждого по счёту символа в распакованных строках, начиная с нулевого, заканчивая тем, где найдётся не равенство
+ * 
+ * Временная сложность:
+ * У нас есть две части алгоритма
+ *   - в первой части мы проходим циклом по всем словам, по каждой букве в слове
+ *   - во второй части, в худшем случае мы пройдёмся так же по всем буквам всех слов
+ * Получается время выполнения прямо пропорционально зависит от количества букв в распакованных словах - O(N), где N - кол-во распакованных букв
+ * 
+ * Пространственная сложность:
+ * В памяти мы храним все распакованные слова, поэтому занимаем O(N) памяти, где N - кол-во распакованных букв
+ */
+
 const fs = require('fs');
 let fileContent = fs.readFileSync('input.txt', 'utf8');
 
-let data = [];
-let count = 0;
+let unpackedWords = [];
+let countWords = 0;
 let dex = 10;
-let specialSymbols = ['1', '2', '3', '4', '5', '6', '7', '8', '9'];
-let minLength = 0;
+let minLengthWord = 0;
 
-
-function findEndIndex(str, startIndex) {
-    let find = false;
-    let i = startIndex - 1;
-    let countOpen = 0;
-    while(i < str.length && !find) {
-        i++;
-        if (str[i] === '[') {
-            countOpen++;
-        }
-        if (str[i] === ']') {
-            if (countOpen > 0) {
-                countOpen--;
-            } else {
-                find = true;
-            }
-        }
-    }
-    return i;
+// проверка на соответствие числу
+function isNumber(symbol) {
+    return (symbol >= '0' && symbol <= '9')
 }
 
-function unpack(str, startIndex, endIndex) {
-    let result = '';
-    for (let i = startIndex; i <= endIndex; i++) {
-        if (specialSymbols.some(s => s === str[i])) {
-            let end = findEndIndex(str, i + 2);
-            let unpackPart = unpack(str, i + 2, end - 1);
-            for (let j = 0; j < parseInt(str[i], dex); j++) {
-                result = `${result}${unpackPart}`;
-            }
-            i = end;
-        } else {
-            result = `${result}${str[i]}`;
+// распакова строки
+function unpack(str) {
+    let stack = [''];
+    for(let i = 0; i < str.length; i++) {
+        const symbol = str[i];
+        if(isNumber(symbol)) {
+            stack.push(symbol);
+            continue;
         }
+        if(symbol === '[') {
+            stack.push('');
+            continue;
+        }
+        if(symbol === ']') {
+            const temp = stack.pop();
+            const rep = +stack.pop();
+            stack.push(stack.pop() + temp.repeat(rep));
+            continue;
+        }
+        stack.push(stack.pop() + symbol);
     }
-    return result;
+    return stack[0];
 }
 
 fileContent.split('\n').forEach((line, index) => {
     if (index === 0) {
-        count = parseInt(line, dex);
+        countWords = parseInt(line, dex);
     }
-    if (index > 0 && index <= count) {
+    if (index > 0 && index <= countWords) {
         let unpackSubstr = unpack(line, 0, line.length - 1);
-        data.push(unpackSubstr);
-        if (minLength === 0 || minLength < unpackSubstr.length) {
-            minLength = unpackSubstr.length;
+        unpackedWords.push(unpackSubstr);
+        // находим самое короткое слово
+        if (minLengthWord === 0 || minLengthWord < unpackSubstr.length) {
+            minLengthWord = unpackSubstr.length;
         }
     }
 });
 
-let index = 0;
-let notEqual = false;
-let result = '';
+// непосредственно считаем префикс
+function calcPrefix() {
+    let index = 0;
+    let notEqual = false;
+    let result = '';
+    
+    // идём по буквам, от нулевой, до самой последней в самом коротком слове
+    while(index < minLengthWord && !notEqual) {
+        let symbol = unpackedWords[0][index];
+        let j = 1;
+        // проходимся по всем словам и сравниваем текущую букву
+        while (j < unpackedWords.length && !notEqual) {
+            notEqual = symbol !== unpackedWords[j][index];
+            j++;
+        }
+        // если соответствующие буквы равны во всех словах, то добавляем её в результат
+        if (!notEqual) {
+            result = `${result}${symbol}`;
+        }
+        index++;
+    }
 
-while(index < minLength && !notEqual) {
-    let symbol = data[0][index];
-    let j = 1;
-    while (j < data.length && !notEqual) {
-        notEqual = symbol !== data[j][index];
-        j++;
-    }
-    if (!notEqual) {
-        result = `${result}${symbol}`;
-    }
-    index++;
+    return result;
 }
 
-fs.writeFileSync('output.txt', result);
+
+fs.writeFileSync('output.txt', calcPrefix());
