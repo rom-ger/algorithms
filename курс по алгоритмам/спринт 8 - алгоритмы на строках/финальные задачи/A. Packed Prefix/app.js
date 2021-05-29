@@ -5,14 +5,16 @@
  * 1. Распаковываем каждую строку с помощью простого стэка
  * 2. Проверяем на равенство каждого по счёту символа в распакованных строках, начиная с нулевого, заканчивая тем, где найдётся не равенство
  * 
+ * Пусть M - кол-во строк, K - средняя длина запакованной строки, MinL - длинна самой маленькой распакованной строки, MiddleL - средняя длина распакованной строки
+ * 
  * Временная сложность:
  * У нас есть две части алгоритма
- *   - в первой части мы проходим циклом по всем словам, по каждой букве в слове
- *   - во второй части, в худшем случае мы пройдёмся так же по всем буквам всех слов
- * Получается время выполнения прямо пропорционально зависит от количества букв в распакованных словах - O(N), где N - кол-во распакованных букв
+ *   - в первой части мы проходим циклом по всем строкам, по каждой букве в строке
+ *   - во второй части, мы сделаем MinL итераций по всем строкам
+ * Итог: O(M * K) + O(MinL * M) = O(M*(k + MinL))
  * 
  * Пространственная сложность:
- * В памяти мы храним все распакованные слова, поэтому занимаем O(N) памяти, где N - кол-во распакованных букв
+ * В памяти мы храним все распакованные слова, поэтому занимаем O(M * MiddleL) памяти
  */
 
 const fs = require('fs');
@@ -20,11 +22,11 @@ let fileContent = fs.readFileSync('input.txt', 'utf8');
 
 let unpackedWords = [];
 let countWords = 0;
-let dex = 10;
+let DEX = 10;
 let minLengthWord = 0;
 
 // проверка на соответствие числу
-function isNumber(symbol) {
+function isCharacterNumeric(symbol) {
     return (symbol >= '0' && symbol <= '9')
 }
 
@@ -33,7 +35,7 @@ function unpack(str) {
     let stack = [''];
     for(let i = 0; i < str.length; i++) {
         const symbol = str[i];
-        if(isNumber(symbol)) {
+        if(isCharacterNumeric(symbol)) {
             stack.push(symbol);
             continue;
         }
@@ -54,14 +56,14 @@ function unpack(str) {
 
 fileContent.split('\n').forEach((line, index) => {
     if (index === 0) {
-        countWords = parseInt(line, dex);
+        countWords = parseInt(line, DEX);
     }
     if (index > 0 && index <= countWords) {
-        let unpackSubstr = unpack(line, 0, line.length - 1);
-        unpackedWords.push(unpackSubstr);
+        let unpackResult = unpack(line);
+        unpackedWords.push(unpackResult);
         // находим самое короткое слово
-        if (minLengthWord === 0 || minLengthWord < unpackSubstr.length) {
-            minLengthWord = unpackSubstr.length;
+        if (minLengthWord === 0 || minLengthWord < unpackResult.length) {
+            minLengthWord = unpackResult.length;
         }
     }
 });
